@@ -20,13 +20,12 @@ class Write_vinyl:
         self.product_links: list = []
         self.product_list: list = []
         self.page_numbers: list = []
+        self.genre: str = ""
         self.genres: list = []
         self.records: list = []
+        self.record_genre: str = ""
         self.base_url: str = 'https://aux33tours.com'
-        self.genre: str = ""
         self.category: str = ''
-        # self.set_last_page()
-        # self.get_genres()
         self.write_new_arrivals()
 
     def get_genres(self) -> list:
@@ -74,26 +73,36 @@ class Write_vinyl:
             r2 = requests.get(self.product_link, headers=self.headers)
             soup = BeautifulSoup(r2.content, "lxml")
             self.name = soup.find('h1', class_='product-meta__title heading h1').text.strip()
+            self.name = self.name.replace(' (Vinyle Neuf)', '')
             self.price = soup.find('span', class_='price').text.strip()
+            self.record_genre = soup.find('div', class_='rte text--pull').text.strip()
+            self.record_genre = self.record_genre.replace('Type :  Vinyle Neuf   Genre :  ', '')
+            self.record_genre = self.record_genre.split('Relié', 1)[0]
+            self.record_genre = self.record_genre.split('Veuillez', 1)[0]
+            # self.record_genre = self.record_genre.replace('''Veuillez noter qu'il s'agit d'un produit NEUF. La photo affichée est à des fins d'illustrations et ne concorde pas nécessairement au produit. Aucun retour n'est possible si déballé.''', '')
+            self.record_genre = self.record_genre.strip()
             self.records.append({
                 "name": self.name,
                 "price": self.price,
-                "link": self.product_link
+                "link": self.product_link,
+                "genre": self.record_genre
             })
         return self.records
 
     def write_new_arrivals(self):
         self.category = '/collections/nouveautes/'
         for genre in self.get_genres():
-            self.genre = genre
-            self.write_to_file(self.genre, 'New-Arrivals')
+            # if genre == 'ambient':
+            if genre.startswith("nouveaux-arrivages"):
+                self.genre = genre
+                self.write_to_file(self.genre, 'New-Arrivals')
         print("Done! New arrivals have been saved.")
 
     def write_to_file(self, FILE_NAME, FOLDER):
         with open(f'csv/records/{FOLDER}/{FILE_NAME}.csv', mode="w", newline="") as csvfile:
             print(f'Writing {FILE_NAME} to file...')
             records = self.vinyl_link()
-            fieldnames = (['name', 'price', 'link'])
+            fieldnames = (['name', 'price', 'link', 'genre'])
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(records)
