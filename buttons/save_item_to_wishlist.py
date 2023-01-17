@@ -23,6 +23,7 @@ class SaveToWishlist:
 
     def create_file(self):
         if not self.file_exists():
+            print("file does not exist")
             with open(self.FILE_NAME, mode="w", newline="") as csvfile:
                 print(f'Creating {self.FILE_NAME} and writing to file...')
                 fieldnames = (["name", "price", "link", "genre"])
@@ -32,30 +33,17 @@ class SaveToWishlist:
 
     def save(self) -> None:
         if not self.file_exists():
-            with open(self.FILE_NAME, mode="w", newline="") as csvfile:
-                print(f'Writing {self.FILE_NAME} to file...')
-                record = self.record
-                try:
-                    print(record)
-                except KeyError as e:
-                    print(e)
-                print(self.is_in_wishlist(record))
+            self.create_file()
+
+        with open(self.FILE_NAME, mode="a", newline="") as csvfile:
+            record = self.record
+            if not self.is_in_wishlist(record):
                 fieldnames = (["name", "price", "link", "genre"])
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
                 writer.writerow(record)
                 csvfile.close()
-
-        elif self.file_exists():
-            with open(self.FILE_NAME, mode="a", newline="") as csvfile:
-                record = self.record
-                if not self.is_in_wishlist(record):
-                    fieldnames = (["name", "price", "link", "genre"])
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    writer.writerow(record)
-                    csvfile.close()
-                elif self.is_in_wishlist(record):
-                    print("Record is already in wishlist!")
+            elif self.is_in_wishlist(record):
+                print("Record is already in wishlist!")
 
     def is_in_wishlist(self, record: dict) -> bool:
         with open(self.FILE_NAME, mode="r", newline="") as csvfile:

@@ -10,6 +10,7 @@ from datetime import datetime
 
 from buttons.add_to_wishlist import AddToWishlist
 from buttons.save_item_to_wishlist import SaveToWishlist
+from scripts.get_image import GetImage
 
 
 def file_exists(FILE_NAME: str) -> bool:
@@ -24,8 +25,6 @@ class Used(commands.Cog):
 
     @nextcord.slash_command(name="used", description="Fetch a random used vinyl from the new arrivals page", guild_ids=[serverID])
     async def used(self, interaction: Interaction):
-        # TODO: Create a function that fetches a random vinyl from the new arrivals csv
-        # TODO: Also create a function that fetches a random vinyl from the used page
         vinyl = GetUsedVinyl()
         vinyl.run()
         vinyl_dict = vinyl.get_used_arrival_dict()
@@ -34,11 +33,11 @@ class Used(commands.Cog):
             record_info = ""
         elif vinyl_dict['info'] is not None:
             record_info = f'''Info: {vinyl_dict['info']}'''
-        record_purged = {'name': vinyl_dict['name'], 'price': vinyl_dict['price'], 'link': vinyl_dict['link'],
+        simple_record = {'name': vinyl_dict['name'], 'price': vinyl_dict['price'], 'link': vinyl_dict['link'],
                          'genre': vinyl_dict['genre']}
-        view = AddToWishlist(record_purged)
+        view = AddToWishlist(simple_record)
         wishlist = SaveToWishlist(view.user_id)
-        wishlist.save_item(record_purged)
+        wishlist.save_item(simple_record)
         thumbnail = 'https://i.imgur.com/NmA0Ads.png'
         embed = nextcord.Embed(title=vinyl_dict['name'],
                                description=f"Genre: {vinyl_dict['genre']}\nLabel: {vinyl_dict['label']}\nCountry: {vinyl_dict['country']}\nCatalog #: {vinyl_dict['catalog']}\nRecord condition: {vinyl_dict['grade']}\nSleeve condition: {vinyl_dict['sleeve']}\n{record_info}\n\n{vinyl_dict['price']}",
@@ -57,11 +56,8 @@ class Used(commands.Cog):
                 f'''[{current_time}] - {interaction.user.id} ({interaction.user}) added: {vinyl_dict['name']} to their wishlist! {vinyl_dict['link']}''')
 
     def get_image(self, link: str):
-        r = requests.get(link)
-        soup = BeautifulSoup(r.content, "lxml")
-        image = soup.find_all('meta', property='og:image', content=True)
-        for img in image:
-            return img["content"]
+        get_image = GetImage(link)
+        return get_image.get_image()
 
 
 class GetUsedVinyl:
@@ -84,7 +80,6 @@ class GetUsedVinyl:
     def set_random_vinyl(self):
         # random_file = random.choice(os.listdir('csv/records/New-Arrivals'))
         new_arrivals = [filename for filename in os.listdir('csv/records/New-Arrivals-Used/') if filename.startswith("nouveaux-arrivages")]
-        # print(new_arrivals[0])
         with open(f'csv/records/New-Arrivals-Used/{new_arrivals[0]}', 'r') as f:
             reader = csv.DictReader(f)
             self.df = pd.DataFrame(reader, columns=['name', 'price', 'link', 'genre', 'label', 'country', 'catalog', 'grade', 'sleeve', 'info']).sample()
@@ -101,7 +96,16 @@ class GetUsedVinyl:
             f.close()
 
     def get_used_arrival_dict(self) -> dict:
-        record = {'name': self.record_name, 'price': self.record_price, 'link': self.record_link, 'genre': self.record_genre, 'label': self.record_label, 'country': self.record_country, 'catalog': self.record_cat, 'grade': self.record_grade, 'sleeve': self.sleeve_grade, 'info': self.record_info}
+        record = {'name': self.record_name,
+                  'price': self.record_price,
+                  'link': self.record_link,
+                  'genre': self.record_genre,
+                  'label': self.record_label,
+                  'country': self.record_country,
+                  'catalog': self.record_cat,
+                  'grade': self.record_grade,
+                  'sleeve': self.sleeve_grade,
+                  'info': self.record_info}
         return record
 
     def run(self):

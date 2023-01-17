@@ -22,7 +22,7 @@ class New(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @nextcord.slash_command(name='new', description='Fetch a new random record from new arrivals', guild_ids=[serverID])
+    @nextcord.slash_command(name='new', description='Fetch a random new record from new arrivals', guild_ids=[serverID])
     async def new(self, interaction: Interaction):
         vinyl = GetVinyl()
         vinyl.run()
@@ -79,8 +79,7 @@ class GetVinyl:
             reader = csv.DictReader(f)
             self.df = pd.DataFrame(reader, columns=['name', 'price', 'link', 'genre'])
             self.df = self.df.sample()
-            self.name = self.df['name'].to_string(index=False,
-                                                  header=False)  # get name of record / removes index num and header
+            self.name = self.df['name'].to_string(index=False, header=False)  # get name of record / removes index num and header
             self.price = self.df['price'].to_string(index=False, header=False)
             self.link = self.df['link'].to_string(index=False, header=False)
             self.genre = self.df['genre'].to_string(index=False, header=False)

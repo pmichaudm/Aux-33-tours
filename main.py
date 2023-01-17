@@ -13,6 +13,10 @@ def token():
     with open(TOKEN, "r") as f:
         return f.read()
 
+def admin():
+    with open("admin.txt", "r") as f:
+        return f.read()
+
 
 @client.event
 async def on_ready():
@@ -25,20 +29,32 @@ def file_exists(FILE_NAME: str) -> bool:
 
 @client.command()
 async def load(interaction: Interaction, extension):
-    client.load_extension(f"cogs.{extension}")
-    await interaction.send(f"Loaded {extension} cog!")
+    if interaction.user.id == admin():
+        try:
+            client.load_extension(f"cogs.{extension}")
+            await interaction.send(f"Loaded {extension} cog!")
+        except Exception as e:
+            await interaction.send(f"Error loading {extension} cog: {e}")
 
 
 @client.command()
 async def unload(interaction: Interaction, extension):
-    client.unload_extension(f"cogs.{extension}")
-    await interaction.send(f"Unloaded {extension} cog!")
+    if interaction.user.id == admin():
+        try:
+            client.unload_extension(f"cogs.{extension}")
+            await interaction.send(f"Unloaded {extension} cog!")
+        except Exception as e:
+            await interaction.send(f"Error unloading {extension} cog: {e}")
 
 
 @client.command()
 async def reload(interaction: Interaction, extension):
-    client.reload_extension(f"cogs.{extension}")
-    await interaction.send(f"Reloaded {extension} cog")
+    if interaction.user.id == admin():
+        try:
+            client.reload_extension(f"cogs.{extension}")
+            await interaction.send(f"Reloaded {extension} cog")
+        except Exception as e:
+            await interaction.send(f"Error reloading {extension} cog: {e}")
 
 
 initial_extensions = []

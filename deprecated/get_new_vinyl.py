@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 
+
 class GetVinyl:
 
     pd.set_option('display.max_colwidth', None)  # display full text in console
