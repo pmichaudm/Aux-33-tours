@@ -89,9 +89,9 @@ class GetRecord:
             except IndexError:
                 pass
             try:
-                record_info = record_attributes.split('Informations sur le pressage :')[1]
+                self.record_info = record_attributes.split('Informations sur le pressage :')[1]
             except IndexError:
-                record_info = ''
+                self.record_info = ''
             self.record = ({
                 "name": self.name,
                 "price": self.price,

@@ -12,9 +12,8 @@ class FetchRecordLinks:
 
     def fetch_record_links(self) -> list:
         # for page in range(1, 1 + 1):  # testing with 1 page
-        for page in range(1, self.last_page + 1):
-            print(f'{self.url}{page}')
-            r = requests.get(f'{self.url}{page}')
+        for page in range(1, int(self.last_page)+1):
+            r = requests.get(f'{self.url}&page={page}')
             soup = BeautifulSoup(r.content, "lxml")
             self.product_list = soup.find_all('div', class_='product-item__info')
             for item in self.product_list:

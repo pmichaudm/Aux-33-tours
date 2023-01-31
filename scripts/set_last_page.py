@@ -12,7 +12,7 @@ class SetLastPage:
         soups = BeautifulSoup(p.content, "lxml")
         pages = soups.find_all('div', class_='pagination__nav')
         if not pages:
-            self.last_page = 1
+            return 1
         if pages:
             for page in pages:
                 for page_number in page.find_all('a', href=True):

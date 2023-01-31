@@ -48,7 +48,7 @@ class Search(commands.Cog):
     async def search(self, interaction: Interaction, search: str):
         add_to_wishlist = SaveToWishlist(interaction.user.id)
         new_string = search.replace(" ", "+")
-        self.url = f"https://aux33tours.com/search?type=product&q={new_string}*&page=1"
+        self.url = f"https://aux33tours.com/search?type=product&q={new_string}"
         records = self.get_results()
         current_page = 0
         embed = self.get_record_page(records, current_page)
@@ -125,6 +125,8 @@ class Search(commands.Cog):
 
     def get_results(self):
         self.set_last_page()
+        # print("LAST FUCKING PAGE")
+        # print(self.last_page)
         get_links = FetchRecordLinks(self.url, self.last_page)
         return get_links.fetch_record_links()
 
@@ -162,8 +164,8 @@ class Search(commands.Cog):
             embed.set_thumbnail(thumbnail)
 
         else:
-            embed = nextcord.Embed(title="There are no results for your search",
-                                   description="Try to search for something else or try again at a later time!",
+            embed = nextcord.Embed(title="There are no new arrivals!",
+                                   description="Try again at a later time!",
                                    color=0x00ff00)
         return embed
 
