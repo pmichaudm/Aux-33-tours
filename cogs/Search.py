@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from nextcord.ext import commands
 from nextcord import Interaction
 from buttons.save_item_to_wishlist import SaveToWishlist
+from scripts.WishlistLog import WishlistLog
 from scripts.fetch_record_links import FetchRecordLinks
 from scripts.get_record_dict import GetRecord
 from scripts.set_last_page import SetLastPage
@@ -59,7 +60,7 @@ class Search(commands.Cog):
                 current_page = len(records)
             current_page -= 1
             embed = self.get_record_page(records, current_page)
-            wishlistButton.label = "Add to wishlists"
+            wishlistButton.label = "Add to wishlist"
             wishlistButton.disabled = False
             self.urlButton.url = self.record['link']
             await interaction.response.edit_message(embed=embed, view=my_view)
@@ -70,7 +71,7 @@ class Search(commands.Cog):
             if current_page == len(records):
                 current_page = 0
             embed = self.get_record_page(records, current_page)
-            wishlistButton.label = "Add to wishlists"
+            wishlistButton.label = "Add to wishlist"
             wishlistButton.disabled = False
             self.urlButton.url = self.record['link']
             await interaction.response.edit_message(embed=embed, view=my_view)
@@ -82,11 +83,13 @@ class Search(commands.Cog):
             if not add_to_wishlist.file_exists():
                 add_to_wishlist.create_file()
             if add_to_wishlist.is_in_wishlist(self.get_purged_record()):
-                wishlistButton.label = "Already in wishlists"
+                wishlistButton.label = "Already in wishlist"
             else:
                 add_to_wishlist.save_item(self.get_purged_record())
                 add_to_wishlist.save()
-                wishlistButton.label = "Saved to wishlists"
+                wishlistButton.label = "Saved to wishlist"
+                log = WishlistLog()
+                log.add(interaction.user.id, interaction.user, self.record['name'], self.record['link'])
             wishlistButton.disabled = True
             await interaction.response.edit_message(embed=embed, view=my_view)
 

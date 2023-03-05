@@ -9,6 +9,7 @@ from nextcord import Interaction
 from datetime import datetime
 from buttons.add_to_wishlist import AddToWishlist
 from buttons.save_item_to_wishlist import SaveToWishlist
+from scripts.WishlistLog import WishlistLog
 
 
 def file_exists(FILE_NAME: str) -> bool:
@@ -24,17 +25,13 @@ class NewRandom(commands.Cog):
     @nextcord.slash_command(name='random_new', description='Fetch a random new record from new arrivals', guild_ids=[serverID])
     async def random_new(self, interaction: Interaction):
         record_dict = self.set_random_vinyl()
-        record_name = record_dict['name']
-        record_price = record_dict['price']
-        record_link = record_dict['link']
-        record_genre = record_dict['genre']
         view = AddToWishlist(record_dict)
         wishlist = SaveToWishlist(view.user_id)
         wishlist.save_item(record_dict)
         image = self.get_image(record_dict['link'])
         thumbnail = 'https://i.imgur.com/NmA0Ads.png'
-        embed = nextcord.Embed(title=record_name, description=f"Genre: {record_genre}\n\n{record_price}",
-                               url=record_link,
+        embed = nextcord.Embed(title=record_dict['name'], description=f"Genre: {record_dict['genre']}\n\n{record_dict['price']}",
+                               url=record_dict['link'],
                                color=1079206)
         embed.set_thumbnail(thumbnail)
         embed.set_image(image)
@@ -43,10 +40,8 @@ class NewRandom(commands.Cog):
         if view.value is None:
             return
         elif view.value:
-            now = datetime.now()
-            current_time = now.strftime("%H:%M:%S")
-            print(
-                f'[{current_time}] - {interaction.user.id} ({interaction.user}) added: {record_name} to their wishlist! {record_link}')
+            log = WishlistLog()
+            log.add(interaction.user.id, interaction.user, record_dict['name'], record_dict['link'])
 
     @staticmethod
     def get_image(link: str):

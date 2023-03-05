@@ -32,7 +32,6 @@ class SaveToWishlist:
     def save(self) -> None:
         if not self.file_exists():
             self.create_file()
-        print(self.FILE_NAME)
         with open(self.FILE_NAME, mode="r") as f:
             record = self.record
             data = json.load(f)
@@ -40,9 +39,9 @@ class SaveToWishlist:
         with open(self.FILE_NAME, mode="w") as outfile:
             if not self.is_in_wishlist(record):
                 json.dump(data, outfile)
-                print("Record added to wishlist!")
+                # print("Record added to wishlist!")
             elif self.is_in_wishlist(record):
-                print("Record is already in wishlist!")
+                print("Record is already in wishlist! Skipping...")
 
 
     def is_in_wishlist(self, record: dict) -> bool:

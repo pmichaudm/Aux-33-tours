@@ -4,6 +4,7 @@ import json
 from nextcord.ext import commands
 from nextcord import Interaction
 from buttons import add_to_wishlist
+from buttons.save_item_to_wishlist import SaveToWishlist
 from scripts.get_image import GetImage
 
 
@@ -23,6 +24,7 @@ class Used(commands.Cog):
     async def used(self, interaction: Interaction):
 
         embed = self.get_record_page(self.page_number)
+        save = SaveToWishlist(interaction.user.id)
 
         async def previous_callback(interaction: Interaction):
             nonlocal sent_msg
@@ -47,13 +49,13 @@ class Used(commands.Cog):
         async def save_callback(interaction: Interaction):
             nonlocal sent_msg
             embed = self.get_record_page(self.page_number)
-            if not add_to_wishlist.file_exists():
-                add_to_wishlist.create_file()
-            if add_to_wishlist.is_in_wishlist(self.get_purged_record()):
+            if not save.file_exists():
+                save.create_file()
+            if save.is_in_wishlist(self.record):
                 wishlistButton.label = "Already in wishlists"
             else:
-                add_to_wishlist.save_item(self.get_purged_record())
-                add_to_wishlist.save()
+                save.save_item(self.record)
+                save.save()
                 wishlistButton.label = "Saved to wishlists"
             wishlistButton.disabled = True
             await interaction.response.edit_message(embed=embed, view=my_view)
