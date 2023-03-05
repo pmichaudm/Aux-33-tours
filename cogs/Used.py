@@ -1,16 +1,9 @@
-import csv
 import os
 import nextcord
-import pandas as pd
-import requests
-from bs4 import BeautifulSoup
+import json
 from nextcord.ext import commands
 from nextcord import Interaction
-from datetime import datetime
-
 from buttons import add_to_wishlist
-from buttons.add_to_wishlist import AddToWishlist
-from buttons.save_item_to_wishlist import SaveToWishlist
 from scripts.get_image import GetImage
 
 
@@ -37,7 +30,7 @@ class Used(commands.Cog):
             if self.page_number < 0:
                 self.page_number = self.total_pages() - 1
             embed = self.get_record_page(self.page_number)
-            wishlistButton.label = "Add to wishlist"
+            wishlistButton.label = "Add to wishlists"
             wishlistButton.disabled = False
             await interaction.response.edit_message(embed=embed, view=my_view)
 
@@ -47,7 +40,7 @@ class Used(commands.Cog):
             if self.page_number > self.total_pages() - 1:
                 self.page_number = 0
             embed = self.get_record_page(self.page_number)
-            wishlistButton.label = "Add to wishlist"
+            wishlistButton.label = "Add to wishlists"
             wishlistButton.disabled = False
             await interaction.response.edit_message(embed=embed, view=my_view)
 
@@ -57,18 +50,18 @@ class Used(commands.Cog):
             if not add_to_wishlist.file_exists():
                 add_to_wishlist.create_file()
             if add_to_wishlist.is_in_wishlist(self.get_purged_record()):
-                wishlistButton.label = "Already in wishlist"
+                wishlistButton.label = "Already in wishlists"
             else:
                 add_to_wishlist.save_item(self.get_purged_record())
                 add_to_wishlist.save()
-                wishlistButton.label = "Saved to wishlist"
+                wishlistButton.label = "Saved to wishlists"
             wishlistButton.disabled = True
             await interaction.response.edit_message(embed=embed, view=my_view)
 
         my_view = nextcord.ui.View()
         nextButton = nextcord.ui.Button(label=">", style=nextcord.ButtonStyle.blurple, row=1)
         previousButton = nextcord.ui.Button(label="<", style=nextcord.ButtonStyle.blurple, row=1)
-        wishlistButton = nextcord.ui.Button(label="Add to wishlist", style=nextcord.ButtonStyle.green, row=0)
+        wishlistButton = nextcord.ui.Button(label="Add to wishlists", style=nextcord.ButtonStyle.green, row=0)
         my_view.add_item(wishlistButton)
         my_view.add_item(previousButton)
         my_view.add_item(nextButton)
@@ -78,23 +71,21 @@ class Used(commands.Cog):
         sent_msg = await interaction.response.send_message(embed=embed, ephemeral=True, view=my_view)
 
     def get_last_arrivals(self):
-        new_arrivals = [filename for filename in os.listdir('csv/records/New-Arrivals-Used/') if
+        new_arrivals = [filename for filename in os.listdir('json/records/New-Arrivals-Used/') if
                         filename.startswith("nouveaux-arrivages")]
         return new_arrivals[0]
 
     def get_record(self) -> None:
         record = {}
-        with open(f'csv/records/New-Arrivals-Used/{self.get_last_arrivals()}', 'r') as f:
-            csv_reader = csv.DictReader(f)
-            rows = list(csv_reader)
-            record = rows[self.page_number]
+        with open(f'json/records/New-Arrivals-Used/{self.get_last_arrivals()}', 'r') as f:
+            data = json.load(f)
+            record = data[self.page_number]
         self.record = record
 
     def total_pages(self):
-        with open(f'csv/records/New-Arrivals-Used/{self.get_last_arrivals()}', 'r') as f:
-            csv_reader = csv.DictReader(f)
-            rows = list(csv_reader)
-            return len(rows)
+        with open(f'json/records/New-Arrivals-Used/{self.get_last_arrivals()}', 'r') as f:
+            data = json.load(f)
+            return len(data)
 
     def get_record_page(self, page_number: int):
         self.get_record()

@@ -1,5 +1,5 @@
 import os
-import csv
+import json
 
 
 class SaveToWishlist:
@@ -7,7 +7,7 @@ class SaveToWishlist:
     def __init__(self, user_id: int) -> None:
         self.record: dict = {}
         self.user_id: int = user_id
-        self.FILE_NAME: str = f'csv/users/wishlists/{user_id}.csv'
+        self.FILE_NAME: str = f'json/users/wishlists/{user_id}.json'
         self.list: list = []
 
     def __repr__(self) -> str:
@@ -23,34 +23,37 @@ class SaveToWishlist:
 
     def create_file(self):
         if not self.file_exists():
-            print("file does not exist")
-            with open(self.FILE_NAME, mode="w", newline="") as csvfile:
+            with open(self.FILE_NAME, mode="x") as f:
                 print(f'Creating {self.FILE_NAME} and writing to file...')
-                fieldnames = (["name", "price", "link", "genre"])
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                csvfile.close()
+                json.dump({"RecordWishlist": []}, f)
+
+
 
     def save(self) -> None:
         if not self.file_exists():
             self.create_file()
-
-        with open(self.FILE_NAME, mode="a", newline="") as csvfile:
+        print(self.FILE_NAME)
+        with open(self.FILE_NAME, mode="r") as f:
             record = self.record
+            data = json.load(f)
+            data['RecordWishlist'].append(record)
+        with open(self.FILE_NAME, mode="w") as outfile:
             if not self.is_in_wishlist(record):
-                fieldnames = (["name", "price", "link", "genre"])
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writerow(record)
-                csvfile.close()
+                json.dump(data, outfile)
+                print("Record added to wishlist!")
             elif self.is_in_wishlist(record):
                 print("Record is already in wishlist!")
 
+
     def is_in_wishlist(self, record: dict) -> bool:
-        with open(self.FILE_NAME, mode="r", newline="") as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                if row["name"] == record["name"]:
-                    return True
+        with open(self.FILE_NAME, mode="r", newline="") as f:
+            try:
+                data = json.load(f)
+            except json.decoder.JSONDecodeError:
+                return False
+            # for row in data:
+            #     if row["name"] == record["name"]:
+            #         return True
             return False
 
 

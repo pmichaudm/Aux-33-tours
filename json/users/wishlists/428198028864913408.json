@@ -1,0 +1,40 @@
+{
+  "RecordWishlist": [
+    {
+      "name": "John Cale - Mercy (Vinyle Neuf)",
+      "price": "$36.99",
+      "link": "https://aux33tours.com/collections/nouveautes/products/ln00071237-john-cale-mercy-3",
+      "genre": "Rock"
+    },
+    {
+      "name": "Steve Lacy - Gemini Rights (Vinyle Neuf)",
+      "price": "$27.99",
+      "link": "https://aux33tours.com/collections/nouveautes/products/rs00058417-steve-lacy-gemini-rights",
+      "genre": "Funk/Soul"
+    },
+    {
+      "name": "Big John and the Beetlers - Dance Party with the Big Sound of Big John and the Beetlers (Vinyle Usag\u00e9)",
+      "price": "$29.99",
+      "link": "https://aux33tours.com/collections/nouveaux-arrivages-usage/products/lp00246874-big-john-and-the-beetlers-dance-party-with-the-big-sound-of-big-john-and-the-beetlers",
+      "genre": "Rock"
+    },
+    {
+      "name": "Soundtrack - Lucky Lady (Vinyle Usag\u00e9)",
+      "price": "$1.99",
+      "link": "https://aux33tours.com/collections/nouveaux-arrivages-usage/products/lp00387038-soundtrack-lucky-lady",
+      "genre": "Bandes Sonores",
+      "record_label": "Arista",
+      "record_country": "USA",
+      "record_cat": "AL 4069",
+      "record_grade": "VG+",
+      "sleeve_grade": "VG+",
+      "record_info": ""
+    },
+    {
+      "name": "Roger Waters - The Wall: Soundtrack (Vinyle Neuf)",
+      "price": "$51.99",
+      "link": "https://aux33tours.com/products/ln00028023-roger-waters-the-wall-soundtrack?_pos=1&_sid=0d9541a5d&_ss=r",
+      "genre": "Rock"
+    }
+  ]
+}

@@ -36,7 +36,7 @@ class GetRecord:
                 "name": self.name,
                 "price": self.price,
                 "link": self.link,
-                "genre": self.record_genre
+                "genre": self.record_genre.strip()
             })
 
         if self.name.__contains__('Vinyle Usagé') or self.name.__contains__('45-Tours Usagé'):
@@ -49,43 +49,36 @@ class GetRecord:
             try:
                 self.record_genre = record_attributes.split('Genre :', 1)[1]
                 self.record_genre = self.record_genre.split('Maison', 1)[0]
-                self.record_genre.strip()
             except IndexError:
                 self.record_genre = 'N/A'
             try:
                 self.record_label = record_attributes.split('Maison de disque :')[1]
                 self.record_label = self.record_label.split('''Pays d'origine :''')[0]
-                self.record_label.strip()
             except IndexError:
                 self.record_label = 'N/A'
             try:
                 self.record_country = record_attributes.split('''Pays d'origine :''')[1]
                 self.record_country = self.record_country.split('# de catalogue :')[0]
-                self.record_country.strip()
             except IndexError:
                 self.record_country = 'N/A'
             try:
                 self.record_cat = record_attributes.split('# de catalogue :')[1]
                 self.record_cat = self.record_cat.split('État du disque :')[0]
-                self.record_cat.strip()
             except IndexError:
                 self.record_cat = 'N/A'
             try:
                 self.record_grade = record_attributes.split('État du disque :')[1]
                 self.record_grade = self.record_grade.split('(')[0]
                 self.record_grade = self.record_grade.split('État de la pochette :')[0]
-                self.record_grade.strip()
             except IndexError:
                 self.record_grade = 'N/A'
             try:
                 self.sleeve_grade = record_attributes.split('État de la pochette :')[1]
                 self.sleeve_grade = self.sleeve_grade.split('(')[0]
-                self.sleeve_grade.strip()
             except IndexError:
                 self.sleeve_grade = 'N/A'
             try:
                 self.sleeve_grade = self.sleeve_grade.split('Informations sur le pressage :')[0]
-                self.sleeve_grade.strip()
             except IndexError:
                 pass
             try:
@@ -96,12 +89,13 @@ class GetRecord:
                 "name": self.name,
                 "price": self.price,
                 "link": self.link,
-                "genre": self.record_genre,
-                "record_label": self.record_label,
-                "record_country": self.record_country,
-                "record_cat": self.record_cat,
-                "record_grade": self.record_grade,
-                "sleeve_grade": self.sleeve_grade,
-                "record_info": self.record_info
+                "genre": self.record_genre.strip(),
+                "record_label": self.record_label.strip(),
+                "record_country": self.record_country.strip(),
+                "record_cat": self.record_cat.strip(),
+                "record_grade": self.record_grade.strip(),
+                "sleeve_grade": self.sleeve_grade.strip(),
+                "record_info": self.record_info.strip()
             })
+        print(self.record['name'])
         return self.record

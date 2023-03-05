@@ -59,7 +59,7 @@ class Search(commands.Cog):
                 current_page = len(records)
             current_page -= 1
             embed = self.get_record_page(records, current_page)
-            wishlistButton.label = "Add to wishlist"
+            wishlistButton.label = "Add to wishlists"
             wishlistButton.disabled = False
             self.urlButton.url = self.record['link']
             await interaction.response.edit_message(embed=embed, view=my_view)
@@ -70,7 +70,7 @@ class Search(commands.Cog):
             if current_page == len(records):
                 current_page = 0
             embed = self.get_record_page(records, current_page)
-            wishlistButton.label = "Add to wishlist"
+            wishlistButton.label = "Add to wishlists"
             wishlistButton.disabled = False
             self.urlButton.url = self.record['link']
             await interaction.response.edit_message(embed=embed, view=my_view)
@@ -82,11 +82,11 @@ class Search(commands.Cog):
             if not add_to_wishlist.file_exists():
                 add_to_wishlist.create_file()
             if add_to_wishlist.is_in_wishlist(self.get_purged_record()):
-                wishlistButton.label = "Already in wishlist"
+                wishlistButton.label = "Already in wishlists"
             else:
                 add_to_wishlist.save_item(self.get_purged_record())
                 add_to_wishlist.save()
-                wishlistButton.label = "Saved to wishlist"
+                wishlistButton.label = "Saved to wishlists"
             wishlistButton.disabled = True
             await interaction.response.edit_message(embed=embed, view=my_view)
 
@@ -94,7 +94,7 @@ class Search(commands.Cog):
         my_view = nextcord.ui.View(timeout=180)
         nextButton = nextcord.ui.Button(label=">", style=nextcord.ButtonStyle.blurple, row=1)
         previousButton = nextcord.ui.Button(label="<", style=nextcord.ButtonStyle.blurple, row=1)
-        wishlistButton = nextcord.ui.Button(label="Add to wishlist", style=nextcord.ButtonStyle.green, row=0)
+        wishlistButton = nextcord.ui.Button(label="Add to wishlists", style=nextcord.ButtonStyle.green, row=0)
         browseButton = nextcord.ui.Button(label="Browse", style=nextcord.ButtonStyle.gray, url=self.url, row=0)
         self.urlButton = nextcord.ui.Button(label="URL", style=nextcord.ButtonStyle.red, url=self.record['link'], row=0)
         my_view.add_item(wishlistButton)

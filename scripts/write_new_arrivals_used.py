@@ -1,7 +1,4 @@
-import csv
-import requests
-from bs4 import BeautifulSoup
-
+import json
 from scripts.get_genres import GetGenres
 from scripts.get_record_dict import GetRecord
 from scripts.set_last_page import SetLastPage
@@ -29,6 +26,7 @@ class WriteUsedVinyl:
     def fetch_links(self) -> None:
         fetch_links = FetchRecordLinks(f'{self.base_url}{self.category}?sort_by=title-ascending&page=', self.get_last_page())
         self.product_links = fetch_links.fetch_record_links()
+        print(self.product_links)
 
     def fetch_record(self) -> None:
         for product in self.product_links:
@@ -41,16 +39,13 @@ class WriteUsedVinyl:
             if genre.startswith("nouveaux-arrivages"):
                 self.genre = genre
                 self.write_to_file(self.genre, 'New-Arrivals-Used')
+                print('test')
         print("Done! New used arrivals have been saved.")
 
     def write_to_file(self, FILE_NAME, FOLDER):
-        with open(f'../csv/records/{FOLDER}/{FILE_NAME}.csv', mode="w", newline="") as csvfile:
+        with open(f'../json/records/{FOLDER}/{FILE_NAME}.json', mode="w", newline="") as jsonFile:
             print(f'Writing {FILE_NAME} to file...')
-            fieldnames = ['name', 'price', 'link', 'genre', 'record_label', 'record_country', 'record_cat', 'record_grade', 'sleeve_grade', 'record_info']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(self.records)
-            csvfile.close()
+            json.dump(self.records, jsonFile)
         print(f"File written: {FILE_NAME}")
 
     def get_genres(self) -> list:

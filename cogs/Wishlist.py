@@ -1,11 +1,11 @@
 import csv
+import json
 import os
 import nextcord
-import requests
-from bs4 import BeautifulSoup
 from nextcord import Interaction
 from nextcord.ext import commands
 from buttons.save_item_to_wishlist import SaveToWishlist
+from scripts.get_record_dict import GetRecord
 
 
 def file_exists(FILE_NAME: str) -> bool:
@@ -23,8 +23,9 @@ class Wishlist(commands.Cog):
 
     @nextcord.slash_command(name="wishlist", description="The bot will send you your wishlist", guild_ids=[serverID])
     async def wishlist(self, interaction: Interaction):
-        if not file_exists(f"csv/users/wishlists/{interaction.user.id}.csv"):
-            self.create_wishlist(interaction.user.id)
+        if not file_exists(f"json/users/wishlists/{interaction.user.id}.json"):
+            save_to_wishlist = SaveToWishlist(interaction.user.id)
+            save_to_wishlist.create_file()
         user_wishlist = self.read_wishlist(interaction.user.id)
         wishlist_pages = self.set_wishlist_pages(user_wishlist)
         wishlist_page = self.set_wishlist_page(0, wishlist_pages)
@@ -59,8 +60,8 @@ class Wishlist(commands.Cog):
             my_view.add_item(nextButton)
         sent_msg = await interaction.response.send_message(embed=embed, ephemeral=True, view=my_view)
 
-    @nextcord.slash_command(name="clearwishlist", description="Clear your wishlist", guild_ids=[serverID])
-    async def clearwishlist(self, interaction: Interaction):
+    @nextcord.slash_command(name="clear_wishlist", description="Clear your wishlist", guild_ids=[serverID])
+    async def clear_wishlist(self, interaction: Interaction):
         user_file = self.get_user_wishlist(interaction.user.id)
         if file_exists(user_file):
             os.remove(user_file)
@@ -72,13 +73,13 @@ class Wishlist(commands.Cog):
     @nextcord.slash_command(name="remove", description="Remove a record from your wishlist. Make sure to enter the full album name when removing.", guild_ids=[serverID])
     async def remove(self, interaction: Interaction, name: str):
         user_wishlist = self.read_wishlist(interaction.user.id)
-        if user_wishlist == []:
-            await interaction.response.send_message("Your wishlist is empty!", ephemeral=True)
+        if not user_wishlist:
+            await interaction.response.send_message("Your wishlists is empty!", ephemeral=True)
         else:
             for item in user_wishlist:
                 if item["name"] == name:
                     user_wishlist.remove(item)
-                    with open (f"csv/users/wishlists/{interaction.user.id}.csv", "w", newline="") as f:
+                    with open (f"json/users/wishlists/{interaction.user.id}.json", "w", newline="") as f:
                         fieldnames = (["name", "price", "link", "genre"])
                         writer = csv.DictWriter(f, fieldnames=fieldnames)
                         writer.writeheader()
@@ -100,64 +101,42 @@ class Wishlist(commands.Cog):
 
 
     def add_user_record(self, link: str, user_id) -> str:
-        r = requests.get(link, headers=self.headers)
-        soup = BeautifulSoup(r.content, "lxml")
-        name = soup.find('h1', class_='product-meta__title heading h1').text.strip()
-        record_genre = soup.find('div', class_='rte text--pull').text.strip()
-        price = soup.find('span', class_='price').text.strip()
-        if name.__contains__("Vinyle Usagé"):
-            name = name.replace(' (Vinyle Usagé)', '')
-            record_genre = record_genre.split('Genre :')[1]
-            record_genre = record_genre.split('Maison de disque :')[0]
-            record_genre = record_genre.strip()
-            link = link.split('?')[0]
-            print(name)
-            print(price)
-            print(record_genre)
-            print(link)
+        get_record = GetRecord(link)
+        record = get_record.get_record()
+        save_to_wishlist = SaveToWishlist(user_id)
+        if record['name'].__contains__("Vinyle Usagé") or record['name'].__contains__('45-Tours Usagé'):
             print("Vinyle Usagé detected")
-            self.write_record_to_wishlist(name, price, link, record_genre, user_id)
+            save_to_wishlist.save_item(record)
+            save_to_wishlist.save()
             return "Used record added to your wishlist!"
-        elif name.__contains__("Vinyle Neuf"):
-            name = name.replace(' (Vinyle Neuf)', '')
-            record_genre = record_genre.split('Genre :')[1]
-            record_genre = record_genre.split('Relié', 1)[0]
-            record_genre = record_genre.split('Veuillez', 1)[0]
-            self.write_record_to_wishlist(name, price, link, record_genre, user_id)
+        elif record['name'].__contains__("Vinyle Neuf"):
+            save_to_wishlist.save_item(record)
+            save_to_wishlist.save()
             return "New record added to your wishlist!"
         else:
             return "Invalid record link, please provide a link to a used or new record from Aux 33 Tours."
 
-
-    def write_record_to_wishlist(self, name: str, price: str, link: str, genre: str, user_id) -> None:
-        with open(f"csv/users/wishlists/{user_id}.csv", "a", newline="") as f:
-            fieldnames = (["name", "price", "link", "genre"])
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writerow({"name": name, "price": price, "link": link, "genre": genre})
-            f.close()
-
     def read_wishlist(self, user_id: int) -> list:
         user_wishlist = []
-        is_empty = True
-        FILE_NAME = f"csv/users/wishlists/{user_id}.csv"
+        FILE_NAME = f"json/users/wishlists/{user_id}.json"
         if not file_exists(FILE_NAME):
             save_to_wishlist = SaveToWishlist(user_id)
             save_to_wishlist.create_file()
         if file_exists(FILE_NAME):
-            with open(f"csv/users/wishlists/{user_id}.csv", "r") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    if row != 0:
-                        is_empty = False
-                        user_wishlist.append(row)
-                if is_empty is True:
-                    # print("User wishlist is empty") #for debugging
+            with open(f"json/users/wishlists/{user_id}.json", "r") as f:
+                try:
+                    data = json.load(f)
+                    for item in data["RecordWishlist"]:
+                        if item != 0:
+                            user_wishlist.append(item)
+                except json.decoder.JSONDecodeError:
+                    print("User wishlist is empty")
                     return []
                 f.close()
         return user_wishlist
 
     def get_user_wishlist(self, user_id: int):
-        user_file = f"csv/users/wishlists/{user_id}.csv"
+        user_file = f"json/users/wishlists/{user_id}.json"
         return user_file
 
     def set_wishlist_pages(self, user_wishlist: list) -> list:
@@ -190,7 +169,8 @@ class Wishlist(commands.Cog):
     def get_wishlist_page(self, user_name: str, user_wishlist: list, wishlist_page: list, wishlist_pages: list):
         thumbnail = 'https://i.imgur.com/NmA0Ads.png'
         if len(user_wishlist) != 0:
-            embed = nextcord.Embed(title=f'''__**{user_name}'s wishlist - {len(user_wishlist)} items**__''', color=0x00ff00)
+            embed = nextcord.Embed(title=f'''__**{user_name}'s wishlists - {len(user_wishlist)} items**__''', color=0x00ff00)
+            print(wishlist_page)
             for item in wishlist_page:
                 if item != " ":
                     embed.add_field(name=f'''{item['name']}''', value=f'''[{item['price']} 🔗]({item['link']})''',
@@ -200,7 +180,7 @@ class Wishlist(commands.Cog):
 
         else:
             embed = nextcord.Embed(title="Your wishlist is empty!",
-                                   description="Add some records to your wishlist by clicking the button on the record embed!",
+                                   description="Add some records to your wishlists by clicking the button on the record embed!",
                                    color=0x00ff00)
         return embed
 

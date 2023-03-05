@@ -1,7 +1,5 @@
-import csv
+import json
 import os
-import requests
-from bs4 import BeautifulSoup
 
 from scripts.get_genres import GetGenres
 from scripts.get_record_dict import GetRecord
@@ -51,14 +49,21 @@ class WriteNewVinyl:
                 self.write_to_file(self.genre, 'New-Arrivals')
         print("Done! New arrivals have been saved.")
 
+    # **** THIS IS THE CSV WRITER ****
+    # def write_to_file(self, FILE_NAME, FOLDER):
+    #     with open(f'../csv/records/{FOLDER}/{FILE_NAME}.csv', mode="w", newline="") as csvfile:
+    #         print(f'Writing {FILE_NAME} to file...')
+    #         fieldnames = ['name', 'price', 'link', 'genre']
+    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    #         writer.writeheader()
+    #         writer.writerows(self.records)
+    #         csvfile.close()
+    #     print(f"File written: {FILE_NAME}")
+
     def write_to_file(self, FILE_NAME, FOLDER):
-        with open(f'../csv/records/{FOLDER}/{FILE_NAME}.csv', mode="w", newline="") as csvfile:
+        with open(f'../json/records/{FOLDER}/{FILE_NAME}.json', mode="w", newline="") as jsonFile:
             print(f'Writing {FILE_NAME} to file...')
-            fieldnames = ['name', 'price', 'link', 'genre']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(self.records)
-            csvfile.close()
+            json.dump(self.records, jsonFile)
         print(f"File written: {FILE_NAME}")
 
     def get_genres(self) -> list:
