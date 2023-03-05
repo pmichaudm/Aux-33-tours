@@ -23,7 +23,7 @@ class GetUsedVinyl:
 
     def set_random_vinyl(self):
         # random_file = random.choice(os.listdir('csv/records/New-Arrivals'))
-        new_arrivals = [filename for filename in os.listdir('../csv/records/New-Arrivals-Used/') if filename.startswith("nouveaux-arrivages")]
+        new_arrivals = [filename for filename in os.listdir('csv/records/New-Arrivals-Used/') if filename.startswith("nouveaux-arrivages")]
         # print(new_arrivals[0])
         with open(f'csv/records/New-Arrivals-Used/{new_arrivals[0]}', 'r') as f:
             reader = csv.DictReader(f)
