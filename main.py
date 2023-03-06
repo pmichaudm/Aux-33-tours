@@ -5,8 +5,8 @@ from nextcord import Interaction
 from nextcord.ext import commands
 import schedule
 import time
-from scripts.write_new_arrivals import WriteNewVinyl
-from scripts.write_new_arrivals_used import WriteUsedVinyl
+from scripts.WriteNew import WriteNewVinyl
+from scripts.WriteUsed import WriteUsedVinyl
 from scripts.Timer import Timer
 
 TOKEN = 'token.txt'
@@ -33,16 +33,18 @@ def scheduled_update():
         print("Writing new records")
         timer.start()
         WriteNewVinyl()
-        print(f"Finished writing new records in {Timer.stop:0.4f} seconds.")
+        elapsedTime = timer.stop()
+        print(f"Finished writing new records in {elapsedTime:0.4f} seconds.")
 
     def writeUsedRecords():
         print("Writing new records")
         timer.start()
         WriteUsedVinyl()
-        print(f"Finished writing used records in {Timer.stop:0.4f} seconds.")
+        elapsedTime = timer.stop()
+        print(f"Finished writing used records in {elapsedTime:0.4f} seconds.")
 
     schedule.every().day.at("18:30").do(writeNewRecords)
-    schedule.every().day.at("18:50").do(writeUsedRecords)
+    schedule.every().day.at("18:40").do(writeUsedRecords)
     while True:
         schedule.run_pending()
         time.sleep(1)
@@ -51,6 +53,8 @@ def scheduled_update():
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+    await client.change_presence(
+        activity=nextcord.Activity(type=nextcord.ActivityType.listening, name="Dark Side of the Moon"))
 
 
 def file_exists(FILE_NAME: str) -> bool:
@@ -89,10 +93,19 @@ async def reload(interaction: Interaction, extension):
 
 @client.command()
 async def ping(interaction: Interaction):
-    for guild in client.guilds:  # guild stands for server
-        for channel in guild.channels:
-            if isinstance(channel, nextcord.TextChannel):  # Check if channel is a text channel
-                await channel.send("Hi")
+    if interaction.user.id == admin():
+        for guild in client.guilds:  # guild stands for server
+            for channel in guild.channels:
+                if isinstance(channel, nextcord.TextChannel):  # Check if channel is a text channel
+                    if channel.name == 'comp-sci':
+                        await channel.send("Hi")
+
+
+@client.command(pass_context=True)
+@commands.has_permissions(administrator=True)
+async def set_channel(interaction: Interaction):
+    await interaction.send("Guild: " + str(interaction.guild.id) + " Channel set to: " + str(interaction.channel.id))
+
 
 
 initial_extensions = []

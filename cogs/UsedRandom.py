@@ -7,7 +7,7 @@ from nextcord import Interaction
 from datetime import datetime
 from buttons.add_to_wishlist import AddToWishlist
 from buttons.save_item_to_wishlist import SaveToWishlist
-from scripts.get_image import GetImage
+from scripts.GetImage import GetImage
 from scripts.WishlistLog import WishlistLog
 
 

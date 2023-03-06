@@ -17,6 +17,7 @@ class GetRecord:
         self.record_grade = ''
         self.sleeve_grade = ''
         self.record_info = ''
+        self.audioDescription = ''
 
     def get_record(self) -> dict:
         self.name = self.soup.find('h1', class_='product-meta__title heading h1').text.strip()
@@ -38,6 +39,7 @@ class GetRecord:
                 "link": self.link,
                 "genre": self.record_genre.strip()
             })
+            return self.record
 
         if self.name.__contains__('Vinyle Usagé') or self.name.__contains__('45-Tours Usagé'):
             record_attributes = self.soup.find('div', class_='rte text--pull').text.strip()
@@ -97,5 +99,14 @@ class GetRecord:
                 "sleeve_grade": self.sleeve_grade.strip(),
                 "record_info": self.record_info.strip()
             })
-        print(self.record['name'])
-        return self.record
+            return self.record
+
+        if not self.name.__contains__('Vinyle Neuf') or not self.name.__contains__('Vinyle Usagé') or not self.name.__contains__('45-Tours Usagé'):
+            self.audioDescription = self.soup.find('div', class_='rte text--pull').text.strip()
+            self.record = ({
+                "name": self.name,
+                "price": self.price,
+                "description": self.audioDescription,
+                "link": self.link
+            })
+            return self.record

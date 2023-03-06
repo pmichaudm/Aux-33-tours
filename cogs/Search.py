@@ -6,12 +6,10 @@ from nextcord.ext import commands
 from nextcord import Interaction
 from buttons.save_item_to_wishlist import SaveToWishlist
 from scripts.WishlistLog import WishlistLog
-from scripts.fetch_record_links import FetchRecordLinks
-from scripts.get_record_dict import GetRecord
-from scripts.set_last_page import SetLastPage
+from scripts.FetchLinks import FetchRecordLinks
+from scripts.GetRecord import GetRecord
+from scripts.SetLastPage import SetLastPage
 
-#TODO - Create a class to fetch record links instead of repeating code
-#TODO - Modify New and Used to use the get_record_dict.py script
 
 def file_exists(FILE_NAME: str) -> bool:
     return os.path.exists(FILE_NAME)
@@ -40,7 +38,7 @@ class Search(commands.Cog):
         self.product_links = []
         self.records = []
         self.product_list = []
-        self.record = []
+        self.record = {}
         self.urlButton = None
 
     @nextcord.slash_command(name="search",
@@ -82,10 +80,10 @@ class Search(commands.Cog):
             embed = self.get_record_page(records, current_page)
             if not add_to_wishlist.file_exists():
                 add_to_wishlist.create_file()
-            if add_to_wishlist.is_in_wishlist(self.get_purged_record()):
+            if add_to_wishlist.is_in_wishlist(self.record):
                 wishlistButton.label = "Already in wishlist"
             else:
-                add_to_wishlist.save_item(self.get_purged_record())
+                add_to_wishlist.save_item(self.record)
                 add_to_wishlist.save()
                 wishlistButton.label = "Saved to wishlist"
                 log = WishlistLog()
@@ -97,7 +95,7 @@ class Search(commands.Cog):
         my_view = nextcord.ui.View(timeout=180)
         nextButton = nextcord.ui.Button(label=">", style=nextcord.ButtonStyle.blurple, row=1)
         previousButton = nextcord.ui.Button(label="<", style=nextcord.ButtonStyle.blurple, row=1)
-        wishlistButton = nextcord.ui.Button(label="Add to wishlists", style=nextcord.ButtonStyle.green, row=0)
+        wishlistButton = nextcord.ui.Button(label="Add to wishlist", style=nextcord.ButtonStyle.green, row=0)
         browseButton = nextcord.ui.Button(label="Browse", style=nextcord.ButtonStyle.gray, url=self.url, row=0)
         self.urlButton = nextcord.ui.Button(label="URL", style=nextcord.ButtonStyle.red, url=self.record['link'], row=0)
         my_view.add_item(wishlistButton)
@@ -117,14 +115,6 @@ class Search(commands.Cog):
         self.record = get_record.get_record()
         return self.record
 
-    def get_purged_record(self):
-        purged_record = {
-                "name": self.record['name'],
-                "price": self.record['price'],
-                "link": self.record['link'],
-                "genre": self.record['genre']
-            }
-        return purged_record
 
     def get_results(self):
         self.set_last_page()
@@ -152,7 +142,8 @@ class Search(commands.Cog):
         if len(records) != 0:
             if name.__contains__('Vinyle Neuf'):
                 embed = nextcord.Embed(title=name, description=f"**Genre:** {self.record['genre']}\n\n{self.record['price']}", url=self.record['link'], color=0x000000)
-            if name.__contains__('Vinyle Usagé') or name.__contains__('45-Tours Usagé'):
+
+            elif name.__contains__('Vinyle Usagé') or name.__contains__('45-Tours Usagé'):
                 embed = nextcord.Embed(title=name, description=f"**Genre:** {self.record['genre']}\n"
                                                                f"**Label:** {self.record['record_label']}\n"
                                                                f"**Country:** {self.record['record_country']}\n"
@@ -161,8 +152,16 @@ class Search(commands.Cog):
                                                                f"**Sleeve condition:** {self.record['sleeve_grade']}\n"
                                                                f"{self.record['record_info']}\n"
                                                                f"{self.record['price']}", url=self.record['link'], color=0x000000)
+            elif not name.__contains__('Vinyle Neuf') or not name.__contains__('Vinyle Usagé') or not name.__contains__('45-Tours Usagé'):
+                description = self.record['description'].replace('\n', '\n\n')
+                embed = nextcord.Embed(title=name, description= f"{self.record['price']}\n\n"
+                                                                f"{description}",
+                                                                url=self.record['link'],color=0x000000)
             thumbnail = 'https://i.imgur.com/NmA0Ads.png'
-            embed.set_footer(text=f'''Result {page_number + 1} out of {len(records)}''', icon_url=thumbnail)
+            try:
+                embed.set_footer(text=f'''Result {page_number + 1} out of {len(records)}''', icon_url=thumbnail)
+            except:
+                embed.set_footer(text=f'''Result 1 out of 1''')
             embed.set_image(get_image(self.record['link']))
             embed.set_thumbnail(thumbnail)
 

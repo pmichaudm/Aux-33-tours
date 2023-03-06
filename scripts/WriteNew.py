@@ -1,10 +1,10 @@
 import json
 import os
 
-from scripts.get_genres import GetGenres
-from scripts.get_record_dict import GetRecord
-from scripts.set_last_page import SetLastPage
-from scripts.fetch_record_links import FetchRecordLinks
+from scripts.GetGenres import GetGenres
+from scripts.GetRecord import GetRecord
+from scripts.SetLastPage import SetLastPage
+from scripts.FetchLinks import FetchRecordLinks
 
 
 def file_exists(FILE_NAME: str) -> bool:
@@ -13,15 +13,11 @@ def file_exists(FILE_NAME: str) -> bool:
 class WriteNewVinyl:
 
     def __init__(self) -> None:
-        self.price: float = 0.00
-        self.name: str = ""
         self.last_page: str = ""
         self.headers: dict = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36'
         }
         self.product_links: list = []
-        self.product_list: list = []
-        self.page_numbers: list = []
         self.genre: str = ""
         self.records: list = []
         self.base_url: str = 'https://aux33tours.com'
@@ -49,19 +45,8 @@ class WriteNewVinyl:
                 self.write_to_file(self.genre, 'New-Arrivals')
         print("Done! New arrivals have been saved.")
 
-    # **** THIS IS THE CSV WRITER ****
-    # def write_to_file(self, FILE_NAME, FOLDER):
-    #     with open(f'../csv/records/{FOLDER}/{FILE_NAME}.csv', mode="w", newline="") as csvfile:
-    #         print(f'Writing {FILE_NAME} to file...')
-    #         fieldnames = ['name', 'price', 'link', 'genre']
-    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    #         writer.writeheader()
-    #         writer.writerows(self.records)
-    #         csvfile.close()
-    #     print(f"File written: {FILE_NAME}")
-
     def write_to_file(self, FILE_NAME, FOLDER):
-        with open(f'../json/records/{FOLDER}/{FILE_NAME}.json', mode="w", newline="") as jsonFile:
+        with open(f'json/records/{FOLDER}/{FILE_NAME}.json', mode="w", newline="") as jsonFile:
             print(f'Writing {FILE_NAME} to file...')
             json.dump(self.records, jsonFile)
         print(f"File written: {FILE_NAME}")

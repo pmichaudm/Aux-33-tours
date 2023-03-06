@@ -25,7 +25,7 @@ class SaveToWishlist:
         if not self.file_exists():
             with open(self.FILE_NAME, mode="x") as f:
                 print(f'Creating {self.FILE_NAME} and writing to file...')
-                json.dump({"RecordWishlist": []}, f)
+                json.dump({"RecordWishlist": [], "AudioWishlist": []}, f)
 
 
 
@@ -35,7 +35,11 @@ class SaveToWishlist:
         with open(self.FILE_NAME, mode="r") as f:
             record = self.record
             data = json.load(f)
-            data['RecordWishlist'].append(record)
+            if 'description' not in record:
+                data['RecordWishlist'].append(record)
+            if 'description' in record:
+                data['AudioWishlist'].append(record)
+
         with open(self.FILE_NAME, mode="w") as outfile:
             if not self.is_in_wishlist(record):
                 json.dump(data, outfile)
@@ -50,12 +54,6 @@ class SaveToWishlist:
                 data = json.load(f)
             except json.decoder.JSONDecodeError:
                 return False
-            # for row in data:
-            #     if row["name"] == record["name"]:
-            #         return True
             return False
 
-
-# def setup(client):
-#     client.add_cog(SaveToWishlist(client))
 

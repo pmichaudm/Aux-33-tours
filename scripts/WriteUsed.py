@@ -1,8 +1,8 @@
 import json
-from scripts.get_genres import GetGenres
-from scripts.get_record_dict import GetRecord
-from scripts.set_last_page import SetLastPage
-from scripts.fetch_record_links import FetchRecordLinks
+from scripts.GetGenres import GetGenres
+from scripts.GetRecord import GetRecord
+from scripts.SetLastPage import SetLastPage
+from scripts.FetchLinks import FetchRecordLinks
 
 
 class WriteUsedVinyl:
@@ -43,7 +43,7 @@ class WriteUsedVinyl:
         print("Done! New used arrivals have been saved.")
 
     def write_to_file(self, FILE_NAME, FOLDER):
-        with open(f'../json/records/{FOLDER}/{FILE_NAME}.json', mode="w", newline="") as jsonFile:
+        with open(f'json/records/{FOLDER}/{FILE_NAME}.json', mode="w", newline="") as jsonFile:
             print(f'Writing {FILE_NAME} to file...')
             json.dump(self.records, jsonFile)
         print(f"File written: {FILE_NAME}")

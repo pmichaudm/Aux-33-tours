@@ -3,9 +3,8 @@ import nextcord
 import json
 from nextcord.ext import commands
 from nextcord import Interaction
-from buttons import add_to_wishlist
 from buttons.save_item_to_wishlist import SaveToWishlist
-from scripts.get_image import GetImage
+from scripts.GetImage import GetImage
 
 
 def file_exists(FILE_NAME: str) -> bool:

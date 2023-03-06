@@ -5,7 +5,7 @@ import nextcord
 from nextcord import Interaction
 from nextcord.ext import commands
 from buttons.save_item_to_wishlist import SaveToWishlist
-from scripts.get_record_dict import GetRecord
+from scripts.GetRecord import GetRecord
 
 
 def file_exists(FILE_NAME: str) -> bool:
@@ -51,7 +51,7 @@ class Wishlist(commands.Cog):
             await interaction.response.edit_message(embed=embed)
 
         my_view = nextcord.ui.View(timeout=180)
-        if wishlist_pages != []:
+        if wishlist_pages:
             nextButton = nextcord.ui.Button(label=">", style=nextcord.ButtonStyle.blurple)
             nextButton.callback = next_callback
             previousButton = nextcord.ui.Button(label="<", style=nextcord.ButtonStyle.blurple)
@@ -91,6 +91,7 @@ class Wishlist(commands.Cog):
                     return
             await interaction.response.send_message("Item not found in wishlist!", ephemeral=True)
 
+
     @nextcord.slash_command(name="add", description="Add a record to your wishlist with a link to Aux33tours' website", guild_ids=[serverID])
     async def add(self, interaction: Interaction, link: str):
         if not link.startswith("https://aux33tours.com/"):
@@ -105,7 +106,6 @@ class Wishlist(commands.Cog):
         record = get_record.get_record()
         save_to_wishlist = SaveToWishlist(user_id)
         if record['name'].__contains__("Vinyle Usagé") or record['name'].__contains__('45-Tours Usagé'):
-            print("Vinyle Usagé detected")
             save_to_wishlist.save_item(record)
             save_to_wishlist.save()
             return "Used record added to your wishlist!"
