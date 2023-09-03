@@ -49,6 +49,7 @@ class Search(commands.Cog):
         new_string = search.replace(" ", "+")
         self.url = f"https://aux33tours.com/search?type=product&q={new_string}"
         records = self.get_results()
+
         current_page = 0
         embed = self.get_record_page(records, current_page)
 
